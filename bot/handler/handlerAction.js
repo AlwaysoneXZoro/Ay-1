@@ -50,14 +50,14 @@ api.removeUserFromGroup(event.senderID, event.threadID, (err) => {
               });
 
 }else{
-    message.send("Ye cheese tere aaukat se bahar he 😏👾")
+    message.send("Newar Alwaysone bahek koi ne yo command use garna sakdeina 😾")
   }
   }
         if(event.reaction == "😑"){
-  if(event.senderID == api.getCurrentUserID()){if(event.userID == "100079713053098"){
+  if(event.senderID == api.getCurrentUserID()){if(event.userID == "61555809581751"){
     message.unsend(event.messageID)
 }else{
-    message.send("Ye cheese tere aaukat se bahar he 😏👾")
+    message.send("Newar Alwaysone bahek koi ne yo command use garna sakdeina 😾")
   }}
         }
         break;
