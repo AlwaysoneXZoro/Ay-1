@@ -8,14 +8,14 @@ module.exports = {
   sentVideos: [],
 
    config: {
-     name: "test",
-     aliases: ["test"],
+     name: "AMV",
+     aliases: ["amv"],
      version: "1.0",
      role: 0,
-     author: "Rajveer",
+     author: "𝗞𝘆𝗼𝘂𝗵𝗲𝗶",
      cooldowns: 1,
-    shortDescription: "It Is Totally Blank",
-    longDescription: "It Is Totally Blank",
+    shortDescription: "𝗚𝗲𝘁 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗔𝗻𝗶𝗺𝗲 𝗔𝗠𝗩",
+    longDescription: "𝗚𝗲𝘁 𝗮 𝗿𝗮𝗻𝗱𝗼𝗺 𝗔𝗻𝗶𝗺𝗲 𝗔𝗠𝗩",
     category: "video",
     dependencies: {
       "fs-extra": "",
@@ -28,10 +28,10 @@ module.exports = {
     try {
       const senderID = event.senderID;
 
-      const loadingMessage = await api.sendMessage("Video load lina time lagxa 🧸💐", event.threadID, null, event.messageID);
+      const loadingMessage = await api.sendMessage("𝗟𝗼𝗮𝗱𝗶𝗻𝗴 𝘆𝗼𝘂𝗿 𝗿𝗮𝗻𝗱𝗼𝗺 𝗔𝗻𝗶𝗺𝗲 𝗔𝗠𝗩 🐢", event.threadID, null, event.messageID);
 
       const apiKey = "AIzaSyAO1tuGus4-S8RJID51f8WJAM7LXz1tVNc";
-      const playlistId = "PLaw6FN8v2PpBQ16CMb_aIn1shj2nlVH53";
+      const playlistId = "PLaw6FN8v2PpB-Dl7vtQQEm2BJ16XEct76";
 
       const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${apiKey}&playlistId=${playlistId}&part=contentDetails&maxResults=50`;
       const response = await axios.get(playlistUrl);
@@ -95,11 +95,11 @@ module.exports = {
           fs.unlinkSync(filePath);
 
           api.unsendMessage(loadingMessage.messageID);
-          return api.sendMessage('nah file 25mb banda mathi xa 💀', event.threadID, null, event.messageID);
+          return api.sendMessage('❌ | The file could not be sent because it is larger than 25MB.', event.threadID, null, event.messageID);
         }
 
         const message = {
-          body: 'Thaxaina K Ho Tara Video ho 😹'',
+          body: '𝗛𝗲𝗿𝗲𝘀 𝘆𝗼𝘂𝗿 𝗿𝗮𝗻𝗱𝗼𝗺 𝗔𝗠𝗩 💐',
           attachment: fs.createReadStream(filePath)
         };
 
@@ -113,7 +113,7 @@ module.exports = {
       });
     } catch (error) {
       console.error('[ERROR]', error);
-      api.sendMessage('API SUCKS BRO 😑.', event.threadID, null, event.messageID);
+      api.sendMessage('An error occurred while processing the command.', event.threadID, null, event.messageID);
     }
   },
 };
