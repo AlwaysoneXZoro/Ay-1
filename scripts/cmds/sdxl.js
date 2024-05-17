@@ -1,48 +1,80 @@
 const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
+const tinyurl = require('tinyurl');
 
 module.exports = {
   config: {
     name: "sdxl",
     aliases: [],
-    author: "Rajveer",
-    version: "2.0",
-    cooldowns: 5,
+    version: "1.0",
+    author: "vex_Kshitiz",
+    countDown: 20,
     role: 0,
-    shortDescription: {
-      en: ""
-    },
-    longDescription: {
-      en: "generate an image"
-    },
-    category: "image",
+    shortDescription: "lado puti",
+    longDescription: "image to image",
+    category: "game",
     guide: {
-      en: "[prompt | model]"
+      en: "{p}sdxl reply to image or {p}sdxl [prompt]"
     }
   },
-  onStart: async function ({ api, event, args }) {
-    let path = __dirname + "/cache/image.png";
-    const tzt = args.join(" ").split("|").map(item => item.trim());
-    let txt = tzt[0];
-    let txt2 = tzt[1];
-
-    let tid = event.threadID;
-    let mid = event.messageID;
-
-    if (!args[0] || !txt || !txt2) return api.sendMessage("Please provide a prompt and a model.", tid, mid);
-
+  onStart: async function ({ message, event, args, api }) {
+    api.setMessageReaction("🕐", event.messageID, (err) => {}, true);
     try {
-      api.sendMessage("⏳ Generating...", tid, mid);
+      const promptApiUrl = "https://www.api.vyturex.com/describe?url="; 
+      const sdxlApiUrl = "https://sdxl-kshitiz.onrender.com/gen";
 
-      let enctxt = encodeURIComponent(txt); 
-      let url = `https://arjhil-prodia-api.arjhilbard.repl.co/generate?prompt=${enctxt}&model=${txt2}`;
+      let imageUrl = null;
+      let prompt = '';
+      let style = 3;
+      if (event.type === "message_reply") {
+        const attachment = event.messageReply.attachments[0];
+        if (!attachment || !["photo", "sticker"].includes(attachment.type)) {
+          return message.reply("❌ | Reply must be an image.");
+        }
+        imageUrl = attachment.url;
+        const promptResponse = await axios.get(promptApiUrl + encodeURIComponent(imageUrl));
+        prompt = promptResponse.data;
+      } else if (args.length > 0 && args[0].startsWith("http")) {
+        imageUrl = args[0];
+        const promptResponse = await axios.get(promptApiUrl + encodeURIComponent(imageUrl));
+        prompt = promptResponse.data;
+      } else if (args.length > 0) {
+     
+        const argParts = args.join(" ").split("|");
+        prompt = argParts[0].trim();
+        if (argParts.length > 1) {
+          style = parseInt(argParts[1].trim());
+        }
+      } else {
+        return message.reply("❌");
+      }
 
-      let result = (await axios.get(url, { responseType: "arraybuffer" })).data; 
+      const sdxlResponse = await axios.get(sdxlApiUrl, {
+        params: {
+          prompt: prompt,
+          style: style 
+        }
+      });
 
-      fs.writeFileSync(path, Buffer.from(result, "utf-8"));
-      api.sendMessage({ attachment: fs.createReadStream(path) }, tid, () => fs.unlinkSync(path), mid);
-    } catch (e) {
-      return api.sendMessage(e.message, tid, mid);
+      if (sdxlResponse.data.status === "success") {
+        const imageUrl = sdxlResponse.data.url;
+        const imagePath = path.join(__dirname, "cache", `${Date.now()}_generated_image.png`);
+        const imageResponse = await axios.get(imageUrl, { responseType: "stream" });
+        const imageStream = imageResponse.data.pipe(fs.createWriteStream(imagePath));
+        imageStream.on("finish", () => {
+          const stream = fs.createReadStream(imagePath);
+          message.reply({
+            body: "",
+            attachment: stream
+          });
+        });
+      } else {
+        throw new Error("Image generation failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      message.reply("❌ | An error occurred. Please try again later.");
     }
   }
 };

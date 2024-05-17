@@ -18,8 +18,8 @@ module.exports = {
   },
 
   onStart: async function ({ args, event, api, usersData }) {
-    const permission = ["100042408666316",
- "100079713053098"];
+    const permission = ["61558085283667", 
+"61558102884886" ];
   if (!permission.includes(event.senderID)) {
     api.sendMessage("You don't have enough permission to use this command. Teri aaukat ki bahar he ye cmd", event.threadID, event.messageID);
     return;

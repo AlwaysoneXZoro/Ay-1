@@ -1,121 +1,83 @@
 const axios = require("axios");
-const fs = require('fs');
-
-function formatSize(bytes) {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes === 0) return '0 Byte';
-  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-}
+const fs = require('fs-extra');
+const { getStreamFromURL, shortenURL, randomString } = global.utils;
 
 module.exports = {
   config: {
     name: "spotify",
     version: "1.0",
-    author: "Rishad",
+    author: "Kshitiz",
     countDown: 10,
     role: 0,
-    shortDescription: "Download Spotify musics by searching",
-    longDescription: "Download Spotify musics by searching",
+    shortDescription: "play song from spotify",
+    longDescription: "play song from spotify",
     category: "music",
-    guide: "{pn} goosebumps"
+    guide: "{pn} sing songname"
   },
 
   onStart: async function ({ api, event, args, message }) {
-    const query = args.join(" ");
-
-    if (!query) {
-      return message.reply("Baka 🗿 provide a track name.");
-    }
-
-    const SearchapiUrl = `https://for-devs.onrender.com/api/spsearch?apikey=fuck&query=${encodeURIComponent(query)}`;
+    const a = await message.reply("downloading your song🕐..");
 
     try {
-      const response = await axios.get(SearchapiUrl);
-      const Rishad = response.data.slice(0, 6);
+      let b = '';
 
-      if (Rishad.length === 0) {
-        return message.reply("❎ No tracks found for the given query.");
+      const c = async () => {
+        const d = event.messageReply.attachments[0];
+        if (d.type === "audio" || d.type === "video") {
+          const e = await shortenURL(d.url);
+          const f = await axios.get(`https://audio-reco.onrender.com/kshitiz?url=${encodeURIComponent(e)}`);
+          return f.data.title;
+        } else {
+          throw new Error("Invalid attachment type.");
+        }
+      };
+
+      if (event.messageReply && event.messageReply.attachments && event.messageReply.attachments.length > 0) {
+        b = await c();
+      } else if (args.length === 0) {
+        throw new Error("Please provide a song name.");
+      } else {
+        b = args.join(" ");
       }
 
-      const trackInfo = Rishad.map((track, index) =>
-        `${index + 1}. ${track.title}\nArtists: ${track.artists}\nDuration: ${track.duration}\nTrack: ${track.url}`
-      ).join("\n\n");
+      const g = await axios.get(`https://spotify-play-iota.vercel.app/spotify?query=${encodeURIComponent(b)}`);
+      const h = g.data.trackURLs;
+      if (!h || h.length === 0) {
+        throw new Error("No track found for the provided song name.");
+      }
 
-      const thumbnails = Rishad.map((track) => track.thumbnail);
+      const i = h[0];
+      const j = await axios.get(`https://sp-dl-bice.vercel.app/spotify?id=${encodeURIComponent(i)}`);
+      const k = j.data.download_link;
 
-      const attachments = await Promise.all(
-        thumbnails.map((thumbnail) =>
-          global.utils.getStreamFromURL(thumbnail)
-        )
-      );
+      const l = await downloadTrack(k);
 
-      const replyMessage = await message.reply({
-        body: `${trackInfo}\n\nReply with the sone number to choose.`,
-        attachment: attachments
+      const m = await shortenURL(k);
+
+      await message.reply({
+        body: `🎧 Playing: ${b}\nDownload Link: ${m}`,
+        attachment: fs.createReadStream(l)
       });
 
-      const data = {
-        commandName: this.config.name,
-        messageID: replyMessage.messageID,
-        tracks: Rishad,
-        currentIndex: 6,
-        originalQuery: query,
-      };
-      global.GoatBot.onReply.set(replyMessage.messageID, data);
-    } catch (error) {
-      console.error(error);
-      api.sendMessage("Error: " + error, event.threadID);
-    }
-  },
+      console.log("Audio sent successfully.");
 
-  onReply: async function ({ api, event, Reply, args, message }) {
-    const userInput = args[0].toLowerCase();
-    const { tracks, currentIndex, originalQuery } = Reply;
-
-    if (!isNaN(userInput) && userInput >= 1 && userInput <= tracks.length) {
-      const selectedTrack = tracks[userInput - 1];
-      message.unsend(Reply.messageID);
-
-      const downloadingMessage = await message.reply(`✅ Downloading track "${selectedTrack.title}"`);
-
-      const SpdlApiUrl = 'https://for-devs.onrender.com/api/spotifydl?apikey=fuck&url=' + encodeURIComponent(selectedTrack.url);
-
-      try {
-        const apiResponse = await axios.get(SpdlApiUrl);
-
-        if (apiResponse.data.id) {
-          const {
-            artists,
-            title,
-            album,
-            releaseDate,
-            downloadUrl
-          } = apiResponse.data;
-
-          const audioResponse = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
-          fs.writeFileSync(__dirname + '/cache/spotifyAudio.mp3', Buffer.from(audioResponse.data));
-
-          const fileSize = fs.statSync(__dirname + '/cache/spotifyAudio.mp3').size;
-          const sizeFormatted = formatSize(fileSize);
-
-          const attachment = fs.createReadStream(__dirname + '/cache/spotifyAudio.mp3');
-
-          const form = {
-            body: `🎶 Now playing:\n\n👤 Artists: ${artists}\n🎵 Title: ${title}\n📀 Album: ${album}\n📅 Release Date: ${releaseDate}\n📦 Size: ${sizeFormatted}`,
-            attachment: attachment
-          };
-
-          message.reply(form);
-        } else {
-          message.reply("Sorry, the Spotify content could not be downloaded.");
-        }
-      } catch (error) {
-        console.error(error);
-        message.reply("Sorry, an error occurred while processing your request.");
-      }
-
-      message.unsend(downloadingMessage.messageID);
+    } catch (n) {
+      console.error("Error occurred:", n);
+      message.reply(`An error occurred: ${n.message}`);
+    } finally {
+      message.unsend(a.messageID);
     }
   }
 };
+
+async function downloadTrack(url) {
+  const o = await getStreamFromURL(url);
+  const p = `${__dirname}/cache/${randomString()}.mp3`;
+  const q = fs.createWriteStream(p);
+  o.pipe(q);
+
+  return new Promise((resolve, reject) => {
+    q.on('finish', () => resolve(p));
+    q.on('error', reject);
+  });
+}

@@ -12,7 +12,7 @@ module.exports = {
   },
 
   onStart: async function ({ api, event, args, message, usersData }) {
-    const imgURL = "https://i.imgur.com/oeF21Tq.gif";
+    const imgURL = "https://i.imgur.com/gxGYYuj.mp4";
     const attachment = await global.utils.getStreamFromURL(imgURL);
 
     const id = event.senderID;
@@ -20,13 +20,13 @@ module.exports = {
     const name = userData.name;
 
     const ment = [{ id: id, tag: name }];
-    const a = "Nemu 🌸";
+    const a = "Solo God🕊🤍";
     const b = " + ";
-    const c = "Aayush";
+    const c = "Alwaysone";
 const e = "Male";
-    const d = "m.me/61555809581751";
-const f = "Not avaiable";
-const g = "None 💀";
+    const d = "";
+const f = "godalwaysone";
+const g = " Pending.....";
 
     message.reply({ 
       body: `${name}, here is the information 🌝
