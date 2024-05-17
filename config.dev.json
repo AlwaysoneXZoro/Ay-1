@@ -18,14 +18,14 @@
   },
 "  "adminBot": [
     "100093016749575",
-    "61558102884886"
+    "61558102884886",
   ],
   "whiteListMode": {
     "enable": false,
     "whiteListIds": [],
     "notes": "if you enable this feature, only the ids in the whiteListIds section can use the bot"
   },
-  "nickNameBot": "Mujibhai 69× 🕊️",
+  "nickNameBot": "Sumi Chan× 🕊️",
   "prefix": "+",
   "database": {
     "type": "sqlite",
