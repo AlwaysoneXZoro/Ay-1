@@ -1,7 +1,7 @@
 {
   "facebookAccount": {
-    "email": "aanimelover856@gmail.com",
-    "password": "Kiyotaka@1",
+    "email": "jikel28662@cgbird.com",
+    "password":"12345@12345",
     "2FASecret": "",
     "i_user": "",
     "proxy": null,
@@ -18,12 +18,6 @@
   },
   "adminBot": [
     "61558102884886",
-    "100077581579943",
-    "61558085283667",
-    "100073427360511",
-    "100093016749575",
-    "61556771164358",
-    "100087591006635"
   ],
   "whiteListMode": {
     "enable": false,
